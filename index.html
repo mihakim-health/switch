@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}img{max-width:100%}</style></head><body>
+<title>숨은 기준 스위치</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;700&display=swap">
+<style>
+/* Layout: 한 화면 무대 — 위 상태줄, 가운데 장면 카드 한 장. 학교급마다 색과 글꼴만 바뀌고 규칙은 같다. */
+:root{
+  --bg:#F3F6EE; --card:#FFFFFF; --paper2:#FFF6E3; --ink:#1F3A3D; --muted:#5B6E6C; --line:#C9D6CE;
+  --a:#F29E38; --onA:#1F3A3D; --b:#2F9C95; --b2:#B4561B; --soft:#DFF1EC;
+  --display:'Jua','Gowun Dodum',system-ui,sans-serif; --body:'Gowun Dodum',system-ui,sans-serif;
+  --radius:18px; color-scheme:light;
+}
+body.e1{
+  --bg:#FBF3E6; --paper2:#FFF0D6; --ink:#3A2E22; --muted:#76654F; --line:#E2D2B8;
+  --a:#7FC37A; --onA:#23361F; --b:#E07A3F; --b2:#B4561B; --soft:#EAF5E3;
+}
+body.e3{
+  --bg:#EFF4FA; --paper2:#E8F1FB; --ink:#22364A; --muted:#5A6B7D; --line:#C9D6E4;
+  --a:#F5B83D; --onA:#22364A; --b:#3E8ACC; --b2:#B4561B; --soft:#E1EDF8;
+}
+body.par{
+  --bg:#F1F0EA; --paper2:#F6F2E6; --ink:#2E3A2F; --muted:#5F6A5E; --line:#CFD3C6;
+  --a:#E9A86B; --onA:#2E3A2F; --b:#5E8C61; --b2:#B0402E; --soft:#E7EDE2;
+}
+body.staff{
+  --bg:#EDF1F1; --paper2:#EAF2F1; --ink:#203A3F; --muted:#56696C; --line:#C5D3D3;
+  --a:#9CC6B9; --onA:#203A3F; --b:#3F7F86; --b2:#B0402E; --soft:#E0ECEA;
+}
+body.adult{--display:'Do Hyeon','IBM Plex Sans KR',system-ui,sans-serif; --body:'IBM Plex Sans KR',system-ui,sans-serif}
+body.mid{
+  --bg:#EEF0F5; --paper2:#F0F3FB; --ink:#232A44; --muted:#5D6480; --line:#C8CDDD;
+  --a:#E8C547; --onA:#232A44; --b:#5468C8; --b2:#B0402E; --soft:#E6E9F7;
+  --display:'Do Hyeon','IBM Plex Sans KR',system-ui,sans-serif; --body:'IBM Plex Sans KR',system-ui,sans-serif;
+}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;padding-inline:16px;display:flex;flex-direction:column}
+body.big{font-size:21px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,textarea:focus-visible,.ch:focus-visible{outline:3px solid var(--b);outline-offset:3px}
+.top{position:relative;z-index:6;background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding-block:14px;border-bottom:2px dashed var(--line)}
+.brand{font-family:var(--display);font-size:1.5em;line-height:1.1;margin-right:auto}
+.brand small{display:block;font-family:var(--body);font-size:.5em;color:var(--muted);letter-spacing:.06em}
+.stat{font-variant-numeric:tabular-nums;font-size:.9em;color:var(--muted)}
+.stat b{color:var(--ink);font-size:1.15em}
+.tool{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:4px 14px;font-size:.9em}
+.tool[aria-pressed="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+main{flex:1;display:flex;align-items:flex-start;justify-content:center;padding-block:22px 28px}
+.stage{width:100%;max-width:820px;display:flex;flex-direction:column;gap:18px}
+.tag{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.85em;letter-spacing:.04em;color:var(--muted)}
+.tag .lv{background:var(--soft);color:var(--ink);border-radius:999px;padding:2px 12px}
+.dots{display:flex;gap:6px}
+.dots i{width:22px;height:8px;border-radius:4px;background:var(--line)}
+.dots i.d{background:var(--a)}
+.dots i.now{background:var(--ink)}
+.scene{background:var(--card);border:2px solid var(--ink);border-radius:var(--radius);padding:26px 26px 22px;box-shadow:6px 6px 0 var(--ink);display:flex;flex-direction:column;gap:16px;min-width:0}
+.sent{font-family:var(--display);font-size:1.75em;line-height:1.55;margin:0;word-break:keep-all}
+.ch{border-radius:8px;padding:0 2px;transition:background .2s}
+.ch.chg{text-decoration:underline wavy var(--b);text-underline-offset:6px;text-decoration-thickness:2px}
+.armed .ch{cursor:pointer;box-shadow:inset 0 -0.45em 0 var(--soft)}
+.armed .ch:hover{background:var(--soft)}
+.ch.key{background:var(--a);color:var(--onA);box-shadow:none}
+.ch.no{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.switch{align-self:flex-start;display:flex;align-items:center;gap:12px;background:none;border:0;padding:0}
+.track{width:72px;height:38px;border-radius:999px;background:var(--b);position:relative;border:2px solid var(--ink);flex:none}
+.knob{position:absolute;top:3px;left:3px;width:28px;height:28px;border-radius:50%;background:var(--card);border:2px solid var(--ink);transition:left .25s;display:grid;place-items:center;font-size:15px;line-height:1}
+.on .track{background:var(--a)}
+.on .knob{left:37px}
+.switch .lbl{font-weight:700}
+.guide{margin:0;color:var(--muted)}
+.msg{margin:0;font-weight:700;color:var(--b2);min-height:1.6em}
+.std{background:var(--paper2);border:2px dashed var(--ink);border-radius:var(--radius);padding:18px 22px;display:flex;flex-direction:column;gap:6px;position:relative}
+.std .k{font-size:.85em;letter-spacing:.08em;color:var(--muted)}
+.std .v{font-family:var(--display);font-size:1.6em;line-height:1.3;word-break:keep-all}
+.stamp{position:absolute;right:16px;top:-14px;background:var(--a);color:var(--onA);border:2px solid var(--ink);border-radius:999px;padding:2px 12px;font-weight:700;transform:rotate(4deg);font-variant-numeric:tabular-nums}
+.ask{font-weight:700;margin:4px 0 0}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start}
+.opt:hover{border-color:var(--ink)}
+.opt .box{flex:none;width:24px;height:24px;border:2px solid var(--ink);border-radius:6px;display:grid;place-items:center;margin-top:2px;font-weight:700}
+.opt[aria-pressed="true"]{border-color:var(--ink);background:var(--soft)}
+.opt[aria-pressed="true"] .box::after{content:"✓"}
+.note{margin:0;padding:12px 16px;border-left:5px solid var(--b);background:var(--paper2);border-radius:0 12px 12px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:4px 14px;font-size:.92em}
+.chip:hover{border-color:var(--ink)}
+textarea{box-sizing:border-box;width:100%;min-height:76px;font:inherit;border:2px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--card);color:var(--ink);resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.go{background:var(--ink);color:var(--card);border:2px solid var(--ink);border-radius:999px;padding:10px 26px;font-weight:700}
+.go.ghost{background:var(--card);color:var(--ink)}
+.go:disabled{opacity:.35;cursor:not-allowed}
+.splash{position:fixed;inset:0;padding-top:96px!important;background:var(--bg);display:grid;place-items:center;padding:24px;z-index:5;text-align:center;overflow:auto}
+.splash .inner{display:flex;flex-direction:column;gap:14px;align-items:center;max-width:580px}
+.splash .num{font-family:var(--display);font-size:1.1em;color:var(--muted);letter-spacing:.1em}
+.splash h2{font-family:var(--display);font-size:2.4em;margin:0;line-height:1.2;text-wrap:balance}
+.splash p{margin:0;color:var(--muted)}
+.pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;width:100%}
+.pick button{background:var(--card);border:2px solid var(--ink);border-radius:var(--radius);box-shadow:5px 5px 0 var(--ink);padding:20px;display:flex;flex-direction:column;gap:4px;align-items:center}
+.pick b{font-family:var(--display);font-size:1.6em;font-weight:400;word-break:keep-all;white-space:nowrap}
+.pick span{color:var(--muted);font-size:.9em}
+.pick .e b{font-family:'Jua',system-ui,sans-serif}
+.pick .m b{font-family:'Do Hyeon',system-ui,sans-serif}
+.how{margin:0;padding:0;list-style:none;display:grid;gap:6px;text-align:left}
+.how li{display:flex;gap:10px}
+.how li span{flex:none;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--card);display:grid;place-items:center;font-size:.85em;font-weight:700}
+.dex{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.dex div{border:2px solid var(--ink);border-radius:14px;padding:10px 14px;background:var(--paper2);min-width:0;word-break:keep-all}
+.dex small{display:block;color:var(--muted);font-size:.8em}
+.dex em{display:block;font-style:normal;color:var(--muted);font-size:.9em;margin-top:4px}
+h2.t{font-family:var(--display);font-size:2em;margin:0;line-height:1.2}
+.list{margin:0;padding-left:1.2em;display:grid;gap:6px}
+.piece{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto}
+.piece .lbl2{font-size:.85em;color:var(--muted)}
+.tiles{display:flex;gap:4px}
+.tiles i{font-style:normal;width:1.9em;height:1.9em;display:grid;place-items:center;border:2px solid var(--ink);border-radius:8px;background:var(--card);font-family:var(--display);font-size:1.05em}
+.tiles i.on{background:var(--a);color:var(--onA)}
+.tiles i.pop{animation:pop .5s}
+@keyframes pop{40%{transform:scale(1.25)}}
+.card{background:var(--card);border:3px solid var(--ink);border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:6px 6px 0 var(--ink);text-align:center;align-items:center}
+.card .eyebrow{font-size:.85em;letter-spacing:.12em;color:var(--muted)}
+.card h2{font-family:var(--display);font-size:1.9em;margin:0;line-height:1.2}
+.phrase{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:100%}
+.phrase div{flex:1 1 120px;max-width:180px;border:2px dashed var(--line);border-radius:14px;padding:10px 6px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.phrase div b{font-family:var(--display);font-weight:400;font-size:1.35em;color:var(--line);word-break:keep-all}
+.phrase div small{color:var(--muted);font-size:.78em}
+.phrase div.mine{border:3px solid var(--ink);background:var(--a)}
+.phrase div.mine b{color:var(--onA)}
+.phrase div.mine small{color:var(--onA)}
+.mysay{margin:0;padding:12px 16px;background:var(--paper2);border-radius:12px;width:100%;word-break:keep-all}
+.mysay small{display:block;color:var(--muted);font-size:.8em}
+.code{font-variant-numeric:tabular-nums;font-size:.85em;color:var(--muted);letter-spacing:.05em}
+.pick{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.field{box-sizing:border-box;flex:1 1 160px;min-width:0;font:inherit;border:2px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--card);color:var(--ink)}
+.sel{flex:1 1 30%;min-width:0;padding-right:8px;appearance:auto}
+.field:focus-visible,#cAgree:focus-visible{outline:3px solid var(--b);outline-offset:2px}
+a.go{display:inline-block;text-align:center;text-decoration:none;align-self:flex-start}
+a.go[aria-disabled="true"]{opacity:.35;cursor:not-allowed}
+.opt.trap{border-style:dashed;opacity:.75}
+.opt.trap .box::after{content:"✕"}
+.trapTag{display:inline-block;margin-left:6px;font-size:.78em;padding:0 8px;border-radius:999px;background:var(--b2);color:var(--card)}
+.note.warn{border-left-color:var(--b2)}
+.info{max-width:680px;width:100%;text-align:left;display:flex;flex-direction:column;gap:18px;padding-block:8px 24px}
+.info h3{font-family:var(--display);font-size:1.25em;margin:0 0 6px;font-weight:400}
+.info p{margin:0;color:var(--ink)}
+.info section{background:var(--card);border:2px solid var(--ink);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.info .def{font-family:var(--display);font-size:1.15em;background:var(--paper2);border-radius:10px;padding:10px 14px}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center;border-top:1px dashed var(--line);padding-top:8px}
+.pair span{min-width:0;word-break:keep-all}
+.pair .to{color:var(--muted);font-weight:700}
+.pair .b{background:var(--paper2);border-radius:8px;padding:4px 8px}
+.pair small{grid-column:1/-1;color:var(--muted);font-size:.85em}
+.info a{color:var(--b);font-weight:700;word-break:break-all}
+.infoCard{width:100%;display:flex;flex-direction:column;gap:2px;align-items:flex-start;text-align:left;background:#2E4057;color:#FFFFFF;border:0;border-radius:16px;padding:14px 18px;box-shadow:4px 4px 0 #F2B04B}
+.infoCard b{font-family:var(--display);font-weight:400;font-size:1.3em}
+.infoCard span{font-size:.9em;color:#DDE6F0}
+.infoCard:focus-visible{outline:3px solid #F2B04B;outline-offset:3px}
+.infoBtn{background:none;border:0;color:var(--muted);text-decoration:underline;font-size:.9em;padding:6px}
+.foot{font-size:.8em;color:var(--muted);padding-block:10px 16px;text-align:center}
+@media (max-width:560px){
+  .top{gap:6px 10px;padding-block:10px}
+  .brand small{font-size:.55em}
+  .tool{padding:2px 10px;font-size:.78em}
+  .stat{font-size:.82em}
+  main{padding-block:12px 20px}
+  .stage{gap:10px}
+  .tag .area{display:none}
+  .dots i{width:14px;height:6px}
+  .tiles i{width:1.7em;height:1.7em;font-size:.95em}
+  .pick{grid-template-columns:1fr 1fr;gap:10px}
+  .pick button{padding:12px 8px;box-shadow:3px 3px 0 var(--ink)}
+  .pick b{font-size:1.2em}
+  .pick span{font-size:.78em}
+  .splash .inner{gap:10px}
+  .how{font-size:.92em}
+  .std{padding:14px 16px}
+  .std .v{font-size:1.35em}
+  .sent{font-size:1.4em}.scene{padding:20px 18px;box-shadow:4px 4px 0 var(--ink)}.brand{font-size:1.25em}.splash h2{font-size:1.9em}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="brand">숨은 기준 스위치<small id="sub">바꿔 보고, 찾고, 이어 보기</small></div>
+  <span class="stat">장면 <b id="sProg">-</b></span>
+  <span class="stat">점수 <b id="sScore">0</b></span>
+  <button class="tool" id="bGoHome" type="button">처음으로</button>
+  <button class="tool" id="bRead" type="button">읽어 주기</button>
+  <button class="tool" id="bBig" type="button" aria-pressed="false">글자 크게</button>
+</header>
+<main><div class="stage" id="stage"></div></main>
+<div class="splash" id="splash" hidden><div class="inner" id="splashIn"></div></div>
+<p class="foot">인천청호초·중학교 · 평등탐험 보물찾기 RUN · 자유롭게 고쳐 쓰고 나눌 수 있는 교육 자료</p>
+
+<script>
+const BANK = {"e1": {"together": true, "label": "초등 1·2학년", "blurb": "보호자와 함께 · 3장면", "piece": "바꿔 보면", "scenes": [{"lv": 1, "area": "놀이", "s": [{"o": "남자아이가", "f": "여자아이가"}, " 인형을 안고 왔어요.", " 친구가 말했어요. ", {"o": "“남자가 무슨 인형이야?”", "f": "“여자가 무슨 인형이야?”", "k": 1}], "std": "인형은 여자아이 것이다", "say": ["인형 이름이 뭐야?", "같이 놀자!", "귀엽다!"], "id": "a0", "g": "m"}, {"lv": 1, "area": "놀이", "s": [{"o": "여자아이가", "f": "남자아이가"}, " 로봇을 골랐어요.", " 친구가 말했어요. ", {"o": "“로봇은 남자 거야!”", "f": "“로봇은 여자 거야!”", "k": 1}], "std": "로봇은 남자아이 것이다", "say": ["로봇 멋지다!", "나도 같이 만들래!", "어떤 로봇이야?"], "id": "a1", "g": "f"}, {"lv": 1, "area": "옷", "s": [{"o": "남자아이가", "f": "여자아이가"}, " 분홍 옷을 입고 왔어요.", " 친구가 웃었어요. ", {"o": "“남자가 분홍색이래요~”", "f": "“여자가 분홍색이래요~”", "k": 1}], "std": "분홍색은 여자 색이다", "say": ["옷 예쁘다!", "분홍색 좋아해?", "나도 그 색 좋아!"], "id": "a2", "g": "m"}, {"lv": 1, "area": "운동", "s": [{"o": "여자아이가", "f": "남자아이가"}, " 달리기에서 1등을 했어요.", " 누군가 말했어요. ", {"o": "“여자가 엄청 빠르네!”", "f": "“남자가 엄청 빠르네!”", "k": 1}], "std": "달리기는 남자가 더 빠르다", "say": ["와, 진짜 빠르다!", "축하해!", "다음엔 나랑 같이 뛰자!"], "id": "a3", "g": "f"}], "perLevel": 3, "steps": ["write"], "levels": [{"name": "바꿔 보면 이상한 말", "tip": "선생님이나 가족과 함께 읽어도 좋아요. '소리로 읽기'를 누르면 읽어 줘요."}], "write": {"ask": "나라면 이렇게 말할래", "ph": "내 말로 써 보세요. 위 말을 눌러서 고쳐 써도 돼요.", "note": "보호자가 함께 써 주세요. 내 말로 써야 다음으로 넘어가요.", "tag": "내 말:"}, "endAsk": "오늘 찾은 말을 가족에게 들려주고, 성별을 바꿔서 다시 말해 보세요."}, "e3": {"together": true, "label": "초등 3·4학년", "blurb": "보호자와 함께 · 3장면", "piece": "당연한 것도", "scenes": [{"lv": 1, "area": "놀이", "s": [{"o": "준호가", "f": "예솔이가"}, " 고무줄놀이에 끼자", " 친구가 말했다. ", {"o": "“남자가 왜 고무줄을 해?”", "f": "“여자가 왜 고무줄을 해?”", "k": 1}], "std": "고무줄놀이는 여자 놀이다", "say": ["같이 하자!", "줄 잡아 줄게!", "몇 단까지 넘었어?"], "id": "b0", "g": "m"}, {"lv": 1, "area": "놀이", "s": [{"o": "예솔이가", "f": "준호가"}, " 축구공을 들고 나가자", " 친구가 말했다. ", {"o": "“여자애가 축구를 해?”", "f": "“남자애가 축구를 해?”", "k": 1}], "std": "축구는 남자 놀이다", "say": ["우리 편 할래?", "같이 차자!", "공 패스해 줘!"], "id": "b1", "g": "f"}, {"lv": 1, "area": "학교", "s": ["청소 시간에", " 이런 말이 들렸다. ", {"o": "“빗자루는 여자, 책상 옮기기는 남자!”", "f": "“빗자루는 남자, 책상 옮기기는 여자!”", "k": 1}], "std": "청소에도 남녀 일이 따로 있다", "say": ["하고 싶은 걸 골라 보자!", "오늘은 바꿔서 해 볼까?", "번갈아 가며 하자!"], "id": "b2", "g": "b"}, {"lv": 2, "area": "가정", "s": ["주말 아침,", " 아빠가 요리를 하자", " 이웃이 말했다. ", {"o": "“아빠가 요리를 다 하네!”", "f": "“엄마가 요리를 다 하네!”", "k": 1}], "std": "요리는 엄마 일이다", "say": ["맛있겠다!", "저도 도울래요!", "오늘 메뉴는 뭐예요?"], "id": "b3", "g": "m"}, {"lv": 2, "area": "꿈", "s": [{"o": "예솔이가", "f": "준호가"}, " 꿈이 소방관이라고 하자", " 친구가 말했다. ", {"o": "“여자가 소방관을 해?”", "f": "“남자가 소방관을 해?”", "k": 1}], "std": "소방관은 남자 직업이다", "say": ["멋진 꿈이다!", "왜 소방관이 되고 싶어?", "사람을 구하는 일이구나!"], "id": "b4", "g": "f"}, {"lv": 2, "area": "가정", "s": [{"o": "준호가", "f": "예솔이가"}, " 동생에게 책을 읽어 주자", " 할머니가 말씀하셨다. ", {"o": "“남자애가 참 다정하네.”", "f": "“여자애가 참 다정하네.”", "k": 1}], "std": "다정함은 여자의 것이다", "say": ["동생을 잘 챙기는구나!", "책 읽어 주는 목소리가 좋다!", "무슨 책이야?"], "id": "b5", "g": "m"}], "perLevel": [2, 1], "steps": ["write"], "levels": [{"name": "놀이와 학교에서", "tip": "성별을 바꾸면 금방 어색해지는 말부터 찾아봐요."}, {"name": "집과 꿈 이야기", "tip": "칭찬처럼 들려도 '○○가'가 붙어 있으면 한 번 더 바꿔 보세요."}], "write": {"ask": "나라면 이렇게 말할래", "ph": "내 말로 써 보세요. 위 예시를 눌러 고쳐 써도 돼요.", "note": "예시를 눌러 고쳐 써도 돼요. 내 말로 써야 다음으로 넘어가요.", "tag": "내 말:"}, "endAsk": "오늘 찾은 말 가운데 들어 본 말이 있나요? 그 말을 바꿔 말하면 어떻게 될까요?"}, "e5": {"label": "초등 5·6학년", "scenes": [{"lv": 1, "area": "학교", "s": [{"o": "준호가", "f": "예솔이가"}, " 넘어져서 울자", " 친구가 말했다. ", {"o": "“남자가 왜 울어?”", "f": "“여자가 왜 울어?”", "k": 1}], "std": "남자는 울면 안 된다", "say": ["많이 아팠구나. 괜찮아?", "울어도 괜찮아. 기다려 줄게.", "보건실 같이 갈까?"], "id": "e0", "lose": ["준호: 속상한 마음을 숨기게 된다", "친구들: 위로하는 방법을 배우지 못한다", "반 전체: 힘들다고 말하기 어려운 분위기가 된다"], "trap": {"t": "준호: 울음을 참는 법을 배워서 더 강해진다", "why": "참는 것과 강한 것은 달라요. 속상한 마음을 숨기게 될 뿐이에요."}, "g": "m"}, {"lv": 1, "area": "외모", "s": [{"o": "준호가", "f": "예솔이가"}, " 머리를 길러서 오자", " 친구가 말했다. ", {"o": "“남자가 머리가 왜 이렇게 길어?”", "f": "“여자가 머리가 왜 이렇게 길어?”", "k": 1}], "std": "머리 길이에도 성별이 있다", "say": ["머리 잘 어울린다!", "길러 보니까 어때?", "나도 한번 길러 볼까?"], "lose": ["준호: 좋아하는 머리 모양을 바꾸게 된다", "친구들: 외모를 성별로 나누게 된다", "모두: 나답게 꾸밀 자유가 줄어든다"], "trap": {"t": "준호: 단정해 보이니 오히려 좋다", "why": "단정함은 성별과 상관없어요. '남자가'가 붙은 게 문제예요."}, "id": "e1", "g": "m"}, {"lv": 1, "area": "체육", "s": ["줄다리기 대표를 뽑을 때", " 누군가 외쳤다. ", {"o": "“힘센 남자애들 나와!”", "f": "“힘센 여자애들 나와!”", "k": 1}], "std": "힘이 센 건 남자다", "say": ["하고 싶은 사람 나와!", "힘 자신 있는 사람 누구야?", "번호 순서대로 나가 보자!"], "id": "e2", "lose": ["여자아이들: 나가 보고 싶어도 망설인다", "남자아이들: 힘이 약하면 놀림받을까 걱정한다", "반 전체: 다 함께 이길 기회를 놓친다"], "trap": {"t": "아무도 손해 없다. 이기려면 원래 그렇게 뽑는다", "why": "힘센 사람은 성별과 상관없이 있어요. 성별로 뽑으면 힘센 친구를 놓쳐요."}, "g": "b"}, {"lv": 1, "area": "외모", "s": [{"o": "예솔이가", "f": "준호가"}, " 발표를 마치고 들어오자", " 친구가 말했다. ", {"o": "“여자는 얼굴이 예뻐야지.”", "f": "“남자는 얼굴이 예뻐야지.”", "k": 1}], "std": "여자는 얼굴로 평가받는다", "say": ["발표 목소리 또렷했어!", "준비 많이 했나 보다.", "네 설명 덕분에 이해됐어."], "id": "e3", "lose": ["예솔: 발표보다 얼굴을 더 신경 쓰게 된다", "친구들: 서로를 외모로 평가하게 된다", "반 전체: 열심히 한 일이 잘 안 보인다"], "trap": {"t": "예솔: 외모에 관심을 받았으니 오히려 좋다", "why": "이건 관심이 아니라 평가예요. 발표는 보지 않고 얼굴만 본 말이에요."}, "g": "f"}, {"lv": 2, "area": "가정", "s": ["저녁을 먹고 나서", " 할머니가 말씀하셨다. ", {"o": "“설거지는 엄마랑 딸 몫이지.”", "f": "“설거지는 아빠랑 아들 몫이지.”", "k": 1}], "std": "집안일은 여자 일이다", "say": ["다 같이 치워요!", "오늘은 제가 그릇 나를게요.", "설거지 당번 정해 봐요."], "id": "e4", "lose": ["엄마와 딸: 쉬는 시간이 줄어든다", "아빠와 아들: 집안일을 배울 기회를 잃는다", "가족 전체: 한 사람만 바쁜 집이 된다"], "trap": {"t": "아빠와 아들: 일을 안 해도 되니 이득이다", "why": "잠깐은 편해 보여도 집안일을 배울 기회와 함께하는 시간을 잃어요."}, "g": "f"}, {"lv": 2, "area": "진로", "s": [{"o": "준호가", "f": "예솔이가"}, " 꿈이 간호사라고 말하자", " 친구들이 물었다. ", {"o": "“남자가 간호사를 해?”", "f": "“여자가 간호사를 해?”", "k": 1}], "std": "간호사는 여자 직업이다", "say": ["왜 간호사가 되고 싶어?", "아픈 사람 돕는 일이구나, 멋지다.", "간호사는 어떤 일을 해?"], "id": "e5", "lose": ["준호: 꿈을 말하기 부끄러워진다", "병원: 다양한 간호사를 만나기 어려워진다", "친구들: 직업을 성별로 나누게 된다"], "trap": {"t": "준호: 다른 꿈을 찾게 되니 오히려 잘된 일이다", "why": "스스로 바꾼 꿈이 아니라 놀림 때문에 접은 꿈이에요."}, "g": "m"}, {"lv": 2, "area": "진로", "s": [{"o": "예솔이가", "f": "준호가"}, " 축구선수가 꿈이라고 하자", " 누군가 말했다. ", {"o": "“여자 축구는 재미없잖아.”", "f": "“남자 축구는 재미없잖아.”", "k": 1}], "std": "운동은 남자가 더 잘한다", "say": ["어느 포지션 좋아해?", "점심시간에 같이 차자!", "좋아하는 선수 있어?"], "id": "e6", "lose": ["예솔: 꿈을 일찍 포기할 수 있다", "여자 선수들: 노력해도 인정받기 어렵다", "모두: 재미있는 경기를 덜 보게 된다"], "trap": {"t": "예솔: 현실을 일찍 알게 되어 다행이다", "why": "'여자 축구는 재미없다'는 사실이 아니라 생각이에요."}, "g": "f"}, {"lv": 2, "area": "학교", "s": ["무거운 책 상자를 옮길 때", " 선생님이 말씀하셨다. ", {"o": "“남학생 두 명만 도와줄래?”", "f": "“여학생 두 명만 도와줄래?”", "k": 1}], "std": "무거운 일은 남자가 한다", "say": ["도와줄 수 있는 사람 두 명?", "오늘 당번이 같이 들어 줄래?", "나눠서 다 같이 들자!"], "id": "e7", "lose": ["여학생: 도울 수 있어도 기회를 못 얻는다", "남학생: 힘든 일을 늘 떠맡는다", "반 전체: 함께 나누는 법을 덜 배운다"], "trap": {"t": "남학생: 힘센 사람으로 인정받으니 이득이다", "why": "늘 '힘센 쪽'으로 불리면 힘들어도 힘들다고 말하기 어려워져요."}, "g": "m"}, {"lv": 3, "area": "학교", "s": ["회장 선거를 앞두고", " 친구들이 말했다. ", {"o": "“회장은 남자, 부회장은 여자가 어울려.”", "f": "“회장은 여자, 부회장은 남자가 어울려.”", "k": 1}], "std": "이끄는 사람은 남자다", "say": ["공약 보고 뽑자!", "누가 우리 반을 잘 챙길까?", "나도 나가 볼까?"], "id": "e8", "lose": ["여자아이들: 회장에 나가기를 망설인다", "남자아이들: 돕는 역할을 어색해한다", "반 전체: 잘 이끌 친구를 놓칠 수 있다"], "trap": {"t": "아무도 손해 없다. 원래 그게 어울린다", "why": "'어울린다'는 느낌이 바로 숨은 기준이에요. 공약이 아니라 성별로 뽑게 돼요."}, "g": "f"}, {"lv": 3, "area": "가정", "s": [{"o": "아빠가", "f": "엄마가"}, " 동생을 데리고 병원에 가자", " 옆집 어른이 말했다. ", {"o": "“아빠가 대단하시네요!”", "f": "“엄마가 대단하시네요!”", "k": 1}], "std": "아이 돌보기는 엄마 일이다", "say": ["동생 빨리 나았으면 좋겠다.", "조심히 다녀오세요!", "(속으로) 엄마가 데려가도, 아빠가 데려가도 같은 일인데."], "id": "e9", "lose": ["엄마: 당연한 일을 해도 칭찬받지 못한다", "아빠: 같은 일을 하고 특별한 일처럼 여겨진다", "아이: 돌봄은 엄마 일이라고 배운다"], "trap": {"t": "아빠: 칭찬을 받았으니 손해 없다", "why": "같은 일을 특별한 일로 만들면 아빠의 돌봄이 '원래 안 하는 일'처럼 돼요."}, "g": "m"}, {"lv": 3, "area": "가정", "s": [{"o": "준호가", "f": "예솔이가"}, " 동생 머리를 예쁘게 묶어 주자", " 이모가 말했다. ", {"o": "“남자애가 참 섬세하네.”", "f": "“여자애가 참 섬세하네.”", "k": 1}], "std": "섬세함은 여자의 것이다", "say": ["손재주가 좋구나!", "동생을 잘 챙기네.", "어떻게 배웠어?"], "id": "e10", "lose": ["준호: 칭찬에도 '남자애가'가 붙는다", "여자아이들: 섬세해도 당연하게 여겨져 칭찬받지 못한다", "모두: 재주를 성별로 나누게 된다"], "trap": {"t": "준호: 칭찬을 받았으니 손해 없다", "why": "'남자애가'가 붙으면 준호가 잘하는 것이 예외처럼 들려요."}, "g": "m"}, {"lv": 3, "area": "학교", "s": [{"o": "예솔이가", "f": "준호가"}, " 수학 대회에서 상을 받자", " 누군가 말했다. ", {"o": "“여자인데 수학을 잘하네!”", "f": "“남자인데 수학을 잘하네!”", "k": 1}], "std": "수학은 남자가 더 잘한다", "say": ["축하해! 많이 연습했구나.", "어떤 문제가 제일 어려웠어?", "비결 좀 알려 줘!"], "id": "e11", "lose": ["예솔: 잘해도 '여자인데'가 붙는다", "다른 여자아이들: 수학은 내 것이 아니라고 느낀다", "남자아이들: 수학을 못하면 더 창피해한다"], "trap": {"t": "예솔: 칭찬을 받았으니 손해 없다", "why": "'여자인데'가 붙으면 예솔이가 잘한 것이 특별한 예외처럼 들려요."}, "g": "f"}], "write": {"ask": "나라면 이렇게 말할래", "ph": "내 말로 써 보세요. 위 예시를 눌러 고쳐 써도 돼요.", "note": "예시를 눌러 고쳐 써도 돼요. 내 말로 써야 다음으로 넘어가요.", "tag": "내 말:"}, "endAsk": "오늘 찾은 말 가운데 우리 반이나 우리 집에서 들어 본 말이 있나요? 그 말을 바꿔 보면 어떻게 될까요?", "levels": [{"name": "들으면 바로 보이는 말", "tip": "성별을 바꾸면 금방 어색해지는 말부터 찾아봐요."}, {"name": "생활 속에 섞인 말", "tip": "집과 학교에서 자주 듣는 말이에요. 귀 기울여 바꿔 보세요."}, {"name": "칭찬처럼 들리는 말", "tip": "좋은 말 같아도 '○○인데', '○○가'가 붙어 있으면 한 번 더 바꿔 보세요."}], "blurb": "학교·집·꿈 이야기 4장면", "piece": "다르게", "perLevel": [1, 2, 1], "steps": ["lose", "write"]}, "mid": {"label": "중학생", "scenes": [{"lv": 1, "area": "학교", "s": [{"o": "민재가", "f": "서윤이가"}, " 방송댄스 동아리에 들어가자", " 친구들이 놀렸다. ", {"o": "“남자가 무슨 방송댄스냐.”", "f": "“여자가 무슨 방송댄스냐.”", "k": 1}], "std": "춤과 표현은 남자답지 않다", "lose": ["민재: 좋아하는 활동을 숨기거나 그만둔다", "동아리: 함께할 사람을 잃는다", "놀린 친구들: 자기도 하고 싶은 걸 말하기 어려워진다"], "id": "m0", "trap": {"t": "놀린 친구들: 재미있었으니 손해 없다", "why": "놀림은 순간 재미있어도, 좋아하는 걸 말하지 못하는 교실을 만들어요."}, "g": "m", "say": ["춤 잘 추더라, 공연 언제야?", "동아리 재밌어? 나도 구경 갈게."]}, {"lv": 1, "area": "SNS", "s": [{"o": "서윤이가", "f": "민재가"}, " 운동 기록 영상을 올리자", " 댓글이 달렸다. ", {"o": "“여자가 근육은 좀… 보기 별로.”", "f": "“남자가 근육은 좀… 보기 별로.”", "k": 1}], "std": "여자 몸은 보기 좋아야 한다", "lose": ["서윤: 운동보다 남의 눈을 먼저 신경 쓴다", "운동하는 다른 여학생: 시작하기 전에 망설인다", "모두: 몸을 '하는 일'보다 '보이는 모습'으로 보게 된다"], "id": "m1", "trap": {"t": "서윤: 솔직한 조언을 들었으니 도움이 됐다", "why": "몸을 '보기 좋은지'로만 평가한 말은 조언이 아니에요. 운동하는 이유를 가려요."}, "g": "f", "say": ["기록 많이 늘었네, 대단하다!", "꾸준히 하는 거 멋있어."]}, {"lv": 1, "area": "체육", "s": [{"o": "민재가", "f": "서윤이가"}, " 피구공이 무섭다고 하자", " 친구가 말했다. ", {"o": "“남자가 그걸 무서워하면 어떡해.”", "f": "“여자가 그걸 무서워하면 어떡해.”", "k": 1}], "std": "남자는 겁이 없어야 한다", "lose": ["민재: 무서워도 말하지 못한다", "체육 시간: 겁나는 친구를 배려하는 규칙이 생기지 않는다", "여학생: '원래 겁이 많은 쪽'으로 여겨진다"], "trap": {"t": "민재: 용기를 배우게 되니 도움이 된다", "why": "용기는 무섭다고 말할 수 있는 데서도 시작해요. '남자가'를 이유로 감정을 막은 말이에요."}, "id": "m2", "g": "m", "say": ["무서우면 뒤쪽에서 해도 돼.", "공 피하는 요령 같이 연습할래?"]}, {"lv": 2, "area": "진로", "s": ["진로 상담 시간에", " 이런 말을 들었다. ", {"o": "“여학생이니까 안정적인 교대 어때?”", "f": "“남학생이니까 안정적인 교대 어때?”", "k": 1}], "std": "여자에게는 안정적인 직업이 맞다", "lose": ["학생: 원래 꿈을 말하지 못하고 접는다", "다른 여학생: 도전적인 진로를 덜 상상한다", "남학생: 교사라는 진로를 덜 떠올린다"], "id": "m3", "trap": {"t": "학생: 안정적인 길을 안내받았으니 손해 없다", "why": "안정이 나쁜 게 아니라, '여학생이니까'가 이유라서 문제예요."}, "g": "f", "say": ["네가 정말 하고 싶은 건 뭐야?", "관심 있는 분야부터 같이 찾아보자."]}, {"lv": 2, "area": "진로", "s": [{"o": "민재가", "f": "서윤이가"}, " 꿈이 유치원 교사라고 하자", " 친척이 말했다. ", {"o": "“남자는 돈을 많이 벌어야지.”", "f": "“여자는 돈을 많이 벌어야지.”", "k": 1}], "std": "가족의 생계는 남자 책임이다", "lose": ["민재: 좋아하는 일 대신 '돈 되는 일'만 고른다", "여성: 생계를 책임지는 사람으로 인정받기 어렵다", "남성: 버는 돈으로만 가치를 평가받는다"], "id": "m4", "trap": {"t": "민재: 돈을 많이 버는 길로 가니 결국 이득이다", "why": "좋아하는 일을 고를 자유를 잃었어요. 돈만으로 꿈을 고르게 돼요."}, "g": "m", "say": ["아이들 좋아하는 거 잘 어울린다!", "좋아하는 일을 찾은 게 멋지다."]}, {"lv": 2, "area": "미디어", "s": ["국가대표 경기 다음 날", " 기사 제목이 떴다. ", {"o": "“미녀 궁수 ○○○, 금메달!”", "f": "“미남 궁수 ○○○, 금메달!”", "k": 1}], "std": "여자 선수는 실력보다 외모로 소개된다", "lose": ["선수: 노력과 기록이 가려진다", "운동하는 여학생: 외모도 신경 써야 한다고 느낀다", "독자: 경기 내용을 덜 알게 된다"], "id": "m5", "trap": {"t": "선수: 외모까지 알려져 더 유명해진다", "why": "유명해져도 기록과 노력이 아니라 얼굴로 기억돼요."}, "g": "f", "say": ["“○○○ 선수, 금메달!”", "“○○○, 마지막 한 발로 금메달!”"]}, {"lv": 3, "area": "가정", "s": ["맞벌이 가정인데", " 학교 공지 문자는 늘 이렇게 시작한다. ", {"o": "“어머님들께 안내드립니다.”", "f": "“아버님들께 안내드립니다.”", "k": 1}], "std": "자녀 교육은 엄마가 챙긴다", "lose": ["엄마: 일하면서 학교 일까지 혼자 챙긴다", "아빠: 아이의 학교생활을 모르고 지나간다", "학생: 한 사람하고만 상의하게 된다"], "id": "m6", "trap": {"t": "아빠: 학교 일을 안 챙겨도 돼서 편하다", "why": "편해 보여도 아이의 학교생활에서 멀어져요."}, "g": "f", "say": ["“보호자님들께 안내드립니다.”", "“학부모님들께 안내드립니다.”"]}, {"lv": 3, "area": "일터", "s": [{"o": "아빠가", "f": "엄마가"}, " 육아휴직을 낸다고 하자", " 회사 동료가 물었다. ", {"o": "“아내는 뭐 하고?”", "f": "“남편은 뭐 하고?”", "k": 1}], "std": "육아는 엄마가 해야 한다", "lose": ["아빠: 휴직을 쓰면서 눈치를 본다", "엄마: 경력이 끊길 위험을 혼자 진다", "아이: 두 보호자와 고르게 시간을 보내기 어렵다"], "id": "m7", "trap": {"t": "동료: 걱정해서 물어본 것이니 문제없다", "why": "질문 속에 '육아는 엄마 몫'이라는 기준이 들어 있어요."}, "g": "m", "say": ["좋은 시간 보내고 와요!", "업무는 같이 나눠 볼게요."]}, {"lv": 3, "area": "가정", "s": ["명절 아침", " 친척 어른이 말했다. ", {"o": "“며느리들은 부엌에서 전 부치고.”", "f": "“사위들은 부엌에서 전 부치고.”", "k": 1}], "std": "명절 일은 며느리 몫이다", "lose": ["며느리: 쉬는 날에 가장 많이 일한다", "사위: 함께할 기회 없이 손님이 된다", "아이들: '원래 그런 것'으로 배운다"], "id": "m8", "trap": {"t": "사위: 쉬니까 이득이다", "why": "쉬는 대신 가족이 함께하는 자리에서 손님이 돼요."}, "g": "f", "say": ["다 같이 나눠서 하자.", "전은 저희가 부칠게요!"]}, {"lv": 3, "area": "단톡방", "s": [{"o": "민재가", "f": "서윤이가"}, " 단톡방에 고민을 털어놓자", " 답이 달렸다. ", {"o": "“남자가 그런 걸로 징징대냐 ㅋㅋ”", "f": "“여자가 그런 걸로 징징대냐 ㅋㅋ”", "k": 1}], "std": "남자는 힘들다고 말하면 안 된다", "lose": ["민재: 다음엔 고민을 혼자 삼킨다", "단톡방 친구들: 서로 힘들다고 말하기 어려워진다", "답을 단 친구: 자기 고민도 말할 곳을 잃는다"], "id": "m9", "trap": {"t": "답을 단 친구: 웃자고 한 말이라 책임 없다", "why": "'ㅋㅋ'를 붙여도 상처는 그대로예요. 장난이라도 책임이 있어요."}, "g": "m", "say": ["무슨 일 있었어? 얘기해 줘.", "힘들었겠다. 들어 줄게."]}], "write": {"ask": "나라면 이렇게 말할래", "ph": "같은 상황에서 바꿔 말해 보세요. 위 예시를 눌러 고쳐 써도 돼요.", "note": "예시를 눌러 고쳐 써도 돼요. 내 말로 써야 다음으로 넘어가요.", "tag": "내 말:"}, "endAsk": "기준 하나가 여러 사람을 동시에 묶었습니다. 오늘 장면 가운데 내 주변에서 본 것은 무엇이고, 그 고리를 끊으려면 누가 무엇을 바꾸면 될까요?", "levels": [{"name": "학교와 SNS", "tip": "교실과 화면 속에서 오가는 말부터 바꿔 봅니다."}, {"name": "진로와 미디어", "tip": "어른의 조언과 기사 제목에도 기준이 숨어 있어요."}, {"name": "가정과 일터", "tip": "일과 가정이 만나는 곳. 손해 보는 사람이 한 명이 아닐 수 있어요."}], "blurb": "SNS·진로·가정과 일터 4장면", "piece": "보여요", "perLevel": [1, 2, 1], "steps": ["lose", "write"]}, "par": {"label": "양육자", "blurb": "아이에게 하는 말·집·일터 4장면", "piece": "함께", "scenes": [{"lv": 1, "area": "아이에게", "s": [{"o": "아들이", "f": "딸이"}, " 넘어져 울자", " 나도 모르게 말했다. ", {"o": "“사내가 뭘 이런 걸로 울어.”", "f": "“여자가 뭘 이런 걸로 울어.”", "k": 1}], "std": "남자아이는 울면 안 된다", "say": ["많이 아팠구나. 괜찮아질 때까지 기다릴게.", "울어도 괜찮아. 어디가 아파?"], "lose": ["아이: 속상한 마음을 말하지 않게 된다", "부모: 아이의 진짜 마음을 듣기 어려워진다", "아이 친구들: 우는 친구를 놀려도 된다고 배운다"], "trap": {"t": "아이: 씩씩하게 자라니 결국 도움이 된다", "why": "참는 것과 씩씩한 것은 달라요. 감정을 숨기는 법만 배우게 돼요."}, "id": "p0", "g": "m"}, {"lv": 1, "area": "아이에게", "s": [{"o": "딸이", "f": "아들이"}, " 편하게 다리를 벌리고 앉자", " 할머니가 말씀하셨다. ", {"o": "“여자애가 조신하게 앉아야지.”", "f": "“남자애가 조신하게 앉아야지.”", "k": 1}], "std": "여자아이는 조신해야 한다", "say": ["편하게 앉아도 괜찮아.", "식사할 땐 모두 바르게 앉자."], "lose": ["아이: 편하게 움직이는 것을 눈치 보게 된다", "아이: 몸을 '어떻게 보이는지'로 먼저 생각하게 된다", "형제자매: 남자와 여자 규칙이 다르다고 배운다"], "trap": {"t": "아이: 예의를 배우니 좋은 일이다", "why": "예의는 성별과 상관없이 모두에게 같아요. '여자애가'가 붙으면 예의가 아니라 기준이 돼요."}, "id": "p1", "g": "f"}, {"lv": 1, "area": "아이에게", "s": [{"o": "아들이", "f": "딸이"}, " 요리 교실에 다니고 싶다고 하자", " 아빠가 말했다. ", {"o": "“남자가 무슨 요리야, 태권도 다녀.”", "f": "“여자가 무슨 요리야, 태권도 다녀.”", "k": 1}], "std": "요리는 남자 일이 아니다", "say": ["재미있겠다! 무슨 요리 배우고 싶어?", "다 배우면 아빠한테도 해 줄래?"], "lose": ["아이: 하고 싶은 것을 말하지 않게 된다", "아이: 스스로 밥을 챙기는 힘을 기를 기회를 잃는다", "가족: 집안일을 나눌 사람이 줄어든다"], "trap": {"t": "아이: 운동을 하게 되니 결국 더 낫다", "why": "운동이 나쁜 게 아니라, 아이가 고를 기회를 '남자가'라는 이유로 잃은 거예요."}, "id": "p2", "g": "m"}, {"lv": 1, "area": "아이에게", "s": [{"o": "딸이", "f": "아들이"}, " 수학 문제를 어려워하자", " 엄마가 말했다. ", {"o": "“괜찮아, 여자는 원래 수학 못해.”", "f": "“괜찮아, 남자는 원래 수학 못해.”", "k": 1}], "std": "여자는 수학을 못한다", "say": ["어려운 문제구나. 같이 천천히 해 보자.", "틀려도 괜찮아. 어디서 막혔어?"], "lose": ["아이: 해 보기도 전에 포기한다", "아이: 어려운 일을 '원래 못하는 것'으로 넘긴다", "아이: 진로를 고를 때 선택지가 줄어든다"], "trap": {"t": "아이: 위로를 받았으니 마음이 편해진다", "why": "위로하려던 말이지만 '원래 못한다'는 기준을 함께 건넸어요."}, "id": "p3", "g": "f"}, {"lv": 2, "area": "일터", "s": ["맞벌이 부부인데", " 아이가 아프자 회사에서 이런 말을 들었다. ", {"o": "“애 아픈 건 엄마가 봐야지.”", "f": "“애 아픈 건 아빠가 봐야지.”", "k": 1}], "std": "아이 돌봄은 엄마 몫이다", "say": ["이번엔 내가 휴가를 낼게.", "돌봄 휴가는 우리 둘 다 쓸 수 있어."], "lose": ["엄마: 일과 돌봄을 혼자 떠맡는다", "아빠: 아이 곁에 있을 기회를 잃는다", "회사: 일과 가정을 함께 챙기는 문화가 자라지 않는다"], "trap": {"t": "아빠: 회사에 남을 수 있으니 이득이다", "why": "잠깐 일은 지켜도 아이가 아플 때 곁에 있을 기회를 잃어요."}, "id": "p4", "g": "f"}, {"lv": 2, "area": "학교", "s": [{"o": "아빠가", "f": "엄마가"}, " 아이 학교 상담에 가자", " 다른 학부모가 말했다. ", {"o": "“아빠가 오시다니 대단하세요!”", "f": "“엄마가 오시다니 대단하세요!”", "k": 1}], "std": "아이 교육은 엄마가 챙긴다", "say": ["누가 가든 같은 일이죠.", "다음엔 저희 둘이 같이 올게요."], "lose": ["엄마: 당연히 해도 인정받지 못한다", "아빠: 같은 일을 특별한 일로 여겨진다", "아이: 학교 일은 엄마 일이라고 배운다"], "trap": {"t": "아빠: 칭찬을 받았으니 손해 없다", "why": "칭찬처럼 들려도 '원래 아빠는 안 오는 곳'이라는 기준이 숨어 있어요."}, "id": "p5", "g": "m"}, {"lv": 2, "area": "가정", "s": ["주말 오후,", " 아이가 물었다. ", {"o": "“엄마는 왜 안 쉬어?”", "f": "“아빠는 왜 안 쉬어?”"}, " 아빠가 답했다. ", {"o": "“집안일은 엄마가 잘하잖아.”", "f": "“집안일은 아빠가 잘하잖아.”", "k": 1}], "std": "집안일은 엄마가 잘한다", "say": ["오늘은 다 같이 나눠서 하자.", "빨래는 아빠랑 네가 맡아 볼까?"], "lose": ["엄마: 쉬는 날에도 쉬지 못한다", "아빠: 집안일을 할 줄 모르는 사람이 된다", "아이: 집안일은 엄마 일이라고 배운다"], "trap": {"t": "아빠: 칭찬을 했으니 문제없다", "why": "'잘하잖아'는 칭찬 같지만, 일을 한 사람에게 계속 맡기는 말이 될 수 있어요."}, "id": "p6", "g": "f"}], "perLevel": [2, 2], "steps": ["lose", "write"], "levels": [{"name": "아이에게 무심코 하는 말", "tip": "좋은 뜻으로 한 말에도 기준이 숨어 있을 수 있어요. 끝까지 하면 가족 보드게임 추첨에 응모할 수 있어요."}, {"name": "우리 집과 일터", "tip": "일과 돌봄이 만나는 곳에서 손해 보는 사람은 누구일까요?"}], "write": {"ask": "우리 아이에게 이렇게 말해 볼게요", "ph": "같은 상황에서 바꿔 말해 보세요. 위 예시를 눌러 고쳐 써도 돼요.", "note": "예시를 내 말로 조금이라도 바꿔 써야 다음으로 넘어가요.", "tag": "나의 다짐:"}, "whoPh": "자녀 학년·반", "endAsk": "오늘 찾은 말 가운데 우리 집에서 들어 본 말이 있나요? 아이와 함께 성별을 바꿔 다시 읽어 보세요."}, "staff": {"label": "교직원", "blurb": "교실·교무실 이야기 4장면", "piece": "우리", "scenes": [{"lv": 1, "area": "교실", "s": ["쉬는 시간에 교실이 소란하자", " 나도 모르게 말했다. ", {"o": "“남자애들은 원래 산만해.”", "f": "“여자애들은 원래 산만해.”", "k": 1}], "std": "남학생은 원래 산만하다", "say": ["모두 자리에 앉아 볼까요?", "무슨 일이 있었는지 들어 볼게요."], "lose": ["남학생: 차분할 수 있어도 기대받지 못한다", "여학생: 늘 차분해야 한다는 기대를 받는다", "교사: 아이마다 다른 이유를 보지 못한다"], "trap": {"t": "교사: 상황을 빨리 정리할 수 있으니 효율적이다", "why": "빨리 정리해도 '원래 그렇다'는 말은 아이가 바뀔 기회를 닫아요."}, "id": "t0", "g": "m"}, {"lv": 1, "area": "평가", "s": ["수행평가 결과를 보며", " 동료 교사에게 말했다. ", {"o": "“역시 수행평가는 여학생들이 훨씬 잘해.”", "f": "“역시 수행평가는 남학생들이 훨씬 잘해.”", "k": 1}], "std": "꼼꼼한 과제는 여학생이 잘한다", "say": ["이번 과제는 누가 어떤 부분을 잘했는지 볼까요?", "준비 과정을 꼼꼼히 챙긴 학생들이 잘했네요."], "lose": ["여학생: 노력이 '원래 잘하는 것'으로 가려진다", "남학생: 처음부터 덜 기대받아 도전하지 않게 된다", "교사: 학생마다 다른 강점과 도움이 필요한 부분을 놓친다"], "trap": {"t": "여학생: 칭찬을 들었으니 손해 없다", "why": "'여학생들이'로 묶으면 각자의 노력이 아니라 성별을 칭찬한 말이 돼요."}, "id": "t1", "g": "f"}, {"lv": 1, "area": "교실", "s": ["학급 행사가 끝나고", " 교실을 정리하며 말했다. ", {"o": "“책상은 남학생들이 옮기자.”", "f": "“책상은 여학생들이 옮기자.”", "k": 1}], "std": "힘쓰는 일은 남학생 몫이다", "say": ["두 명씩 짝지어 옮겨 볼까요?", "옮길 수 있는 사람 손 들어 볼까요?"], "lose": ["남학생: 힘든 일을 늘 떠맡는다", "여학생: 할 수 있어도 기회를 얻지 못한다", "교실: 함께 나누는 문화가 자라지 않는다"], "trap": {"t": "여학생: 힘든 일을 안 해도 되니 이득이다", "why": "잠깐은 편해 보여도 '할 수 없는 사람'으로 여겨지게 돼요."}, "id": "t2", "g": "m"}, {"lv": 1, "area": "교실", "s": ["학부모 상담 주간을 안내하며", " 아이들에게 말했다. ", {"o": "“어머님께 꼭 오시라고 전해 줘.”", "f": "“아버님께 꼭 오시라고 전해 줘.”", "k": 1}], "std": "학부모 상담은 어머니 몫이다", "say": ["보호자께 꼭 전해 줘.", "집에 계신 어른께 안내문을 보여 드려."], "lose": ["어머니: 일하면서도 학교 일을 혼자 챙긴다", "아버지: 아이 학교생활에서 멀어진다", "아이: 학교 일은 엄마 일이라고 배운다"], "trap": {"t": "교사: 연락이 잘 닿는 분을 부르니 효율적이다", "why": "효율처럼 보여도 다른 보호자를 처음부터 빼 버린 말이에요."}, "id": "t3", "g": "f"}, {"lv": 2, "area": "업무", "s": ["업무 분장 회의에서", " 이런 말이 나왔다. ", {"o": "“체육부장은 남자 선생님이 맡아야지.”", "f": "“체육부장은 여자 선생님이 맡아야지.”", "k": 1}], "std": "체육 업무는 남교사의 일이다", "say": ["희망하는 분부터 받아 볼까요?", "경력과 희망을 보고 정해요."], "lose": ["여교사: 맡고 싶어도 후보에 오르지 못한다", "남교사: 원하지 않아도 체육 업무를 떠맡는다", "학생: 체육은 남자 선생님 몫이라고 배운다"], "trap": {"t": "남교사: 중요한 업무를 맡으니 이득이다", "why": "원하지 않는 업무도 '남자니까'로 맡게 되면 선택이 아니라 기준이에요."}, "id": "t4", "g": "m"}, {"lv": 2, "area": "행사", "s": ["졸업식을 준비하며", " 이런 말이 나왔다. ", {"o": "“꽃다발 전달은 여선생님이 하시죠.”", "f": "“꽃다발 전달은 남선생님이 하시죠.”", "k": 1}], "std": "꽃 전달 같은 역할은 여교사 몫이다", "say": ["졸업생과 가까운 선생님이 하시죠.", "해마다 돌아가며 맡아요."], "lose": ["여교사: 보이는 역할만 맡게 된다", "남교사: 축하를 건네는 자리에서 빠진다", "학생: 행사 속 역할이 성별로 나뉜다고 배운다"], "trap": {"t": "여교사: 앞에 나서니 영광이다", "why": "영광처럼 보여도 역할이 성별로 정해졌다는 점은 그대로예요."}, "id": "t5", "g": "f"}, {"lv": 2, "area": "복무", "s": [{"o": "남선생님이", "f": "여선생님이"}, " 육아시간을 쓰겠다고 하자", " 동료가 말했다. ", {"o": "“남선생님이 육아시간을 써요?”", "f": "“여선생님이 육아시간을 써요?”", "k": 1}], "std": "육아는 여교사가 한다", "say": ["필요할 때 쓰시면 되죠.", "업무 조정은 같이 해 볼게요."], "lose": ["남교사: 제도를 쓰면서 눈치를 본다", "여교사: 육아를 혼자 떠맡는다", "학교: 일과 가정을 함께 챙기는 문화가 늦게 자란다"], "trap": {"t": "동료: 놀라서 물어본 것뿐이니 문제없다", "why": "놀람 속에 '육아는 여교사 몫'이라는 기준이 들어 있어요."}, "id": "t6", "g": "m"}, {"lv": 2, "area": "회식", "s": ["회식이 끝나 갈 무렵", " 누군가 말했다. ", {"o": "“정리는 막내 여선생님이 좀 해 줘요.”", "f": "“정리는 막내 남선생님이 좀 해 줘요.”", "k": 1}], "std": "뒷정리는 젊은 여교사 몫이다", "say": ["다 같이 정리하고 가요.", "자리별로 나눠서 정리해요."], "lose": ["막내 여교사: 원하지 않는 일을 떠맡는다", "다른 교사: 함께 정리하는 문화를 잃는다", "학교: 나이와 성별로 일을 나누는 분위기가 굳는다"], "trap": {"t": "막내 여교사: 일을 배우니 도움이 된다", "why": "정리는 배울 일이 아니라 함께할 일이에요. '막내 여'라는 조건이 붙은 게 문제예요."}, "id": "t7", "g": "f"}], "perLevel": [2, 2], "steps": ["lose", "write"], "levels": [{"name": "교실에서 하는 말", "tip": "아이들 앞에서 무심코 한 말에도 기준이 숨어 있을 수 있어요."}, {"name": "교무실과 학교 문화", "tip": "업무와 행사 속 역할 나누기를 바꿔 읽어 봐요."}], "write": {"ask": "내일 이렇게 말해 볼게요", "ph": "같은 상황에서 바꿔 말해 보세요. 위 예시를 눌러 고쳐 써도 돼요.", "note": "예시를 내 말로 조금이라도 바꿔 써야 다음으로 넘어가요.", "tag": "나의 다짐:"}, "endAsk": "오늘 찾은 말 가운데 우리 학교에서 들어 본 말이 있나요? 내일 교실에서 한 문장만 바꿔 말해 보세요."}, "howToSend": "이 카드 화면을 캡처해서 가정통신문에 안내된 방법으로 보내 주세요. 추첨으로 선물을 드려요!"};
+const PHRASE = ["바꿔 보면", "당연한 것도", "다르게", "보여요"];
+const FORM = {"elem": {"base": "https://docs.google.com/forms/d/e/1FAIpQLSdPKE5YpTrUO6xPG4NzTB_t2XEn8eAhAdHhHvLFeCCAspqERg/viewform", "ids": {"grade": "entry.1226714198", "code": "entry.871735294", "piece": "entry.517441959", "says": "entry.1061291535", "who": "entry.1786000091"}}, "mid": {"base": "https://docs.google.com/forms/d/e/1FAIpQLSeCenu6-iEBsCFmigx9ou8grZiwyV-aoLaN7hWoYcwuXSR4tQ/viewform", "ids": {"grade": "entry.3677487", "code": "entry.2013869275", "piece": "entry.906665156", "says": "entry.699862795", "who": "entry.812407893"}}};
+const GRADES = ['e1','e3','e5','mid','par','staff'];
+const ORDER = ['staff','par','e1','e3','e5','mid'];
+const ADULT = ['mid','par','staff'];
+
+const $ = s => document.querySelector(s);
+const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm = s => s.map(c => typeof c === 'string' ? {o:c, f:c, k:0} : {o:c.o, f:c.f ?? c.o, k:c.k ? 1 : 0});
+let S, G, grade;
+
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function scramble(c){ if(c.length<2) return c; let s; do{ s=shuffle(c); }while(s.join('')===c.join('')); return s; }
+const pieceChars = g => [...BANK[g].piece.replace(/\s/g,'')];
+
+function home(){
+  grade=null; S=null;
+  document.body.className=document.body.classList.contains('big')?'big':'';
+  $('#sub').textContent='평등탐험 보물찾기 RUN';
+  $('#sProg').textContent='-'; $('#sScore').textContent='0'; $('#stage').innerHTML='';
+  $('#splashIn').innerHTML=`<button type="button" class="infoCard" id="bInfo"><b>먼저 알아볼까요?</b><span>누구나 읽어 보세요 · 성별을 바꿔 보면 보이는 것들 →</span></button>
+  <span class="num">평등탐험 보물찾기 RUN</span><h2>숨은 기준 스위치</h2>
+  <ol class="how">
+    <li><span>1</span>이야기 속 성별을 스위치로 바꿔 읽어요.</li>
+    <li><span>2</span>바꾸니 어색해진 말을 눌러 숨은 생각을 찾아요.</li>
+    <li><span>3</span>장면을 다 풀면 보물 조각이 나와요. 학년마다, 그리고 양육자와 선생님에게도 조각이 있어요. 다 모으면 문장이 완성돼요.</li>
+  </ol>
+  <p>내 학년을 골라 주세요. 보호자는 '양육자', 선생님은 '교직원'을 골라 주세요.</p>
+  <div class="pick">${GRADES.map(g=>`<button type="button" data-g="${g}"><b style="font-family:${ADULT.includes(g)?"'Do Hyeon'":"'Jua'"},system-ui,sans-serif">${esc(BANK[g].label)}</b><span>${esc(BANK[g].blurb)}</span></button>`).join('')}</div>`;
+  $('#splash').hidden=false;
+  document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>start(b.dataset.g));
+  $('#bInfo').onclick=()=>showInfo(home);
+}
+
+const PAIRS=[
+ ['“남자애가 돼서 뭐 그런 걸로 무서워해~”','“여자애가 돼서 뭐 그런 걸로 무서워해~”','숨은 기준: 남자는 겁이 없어야 한다'],
+ ['(아들에게) “집안일도 잘 도와주지?”','(딸에게) “집안일도 잘 도와주지?”','숨은 기준: 집안일은 원래 여자 몫이고, 남자는 ‘돕는’ 사람이다'],
+ ['(딸에게) “예쁘니까 커서 모델 하면 되겠네~”','(아들에게) “잘생겼으니까 커서 모델 하면 되겠네~”','숨은 기준: 여자아이의 미래는 외모로 정해진다'],
+ ['“남자가 왜 울어?”','“여자가 왜 울어?”','게임 장면 · 숨은 기준: 남자는 울면 안 된다'],
+ ['“아빠가 오시다니 대단하세요!”','“엄마가 오시다니 대단하세요!”','게임 장면 · 숨은 기준: 아이 교육은 엄마가 챙긴다'],
+ ['“괜찮아, 여자는 원래 수학 못해.”','“괜찮아, 남자는 원래 수학 못해.”','게임 장면 · 숨은 기준: 수학은 남자가 더 잘한다'],
+];
+function showInfo(back){
+  $('#splashIn').innerHTML=`<div class="info">
+  <span class="num" style="text-align:center">먼저 알아볼까요?</span>
+  <section><h3>성인지 감수성이란?</h3>
+    <p class="def">일상생활 속에서 성별에 따른 차별 및 불균형을 민감하게 인지하는 것</p></section>
+  <section><h3>이 게임이 다루는 것</h3>
+    <p>익숙한 말일수록 그 안의 기준은 잘 보이지 않습니다. 이야기 속 인물의 성별을 바꿔 읽으면, 한쪽에서만 자연스럽던 말이 어색하게 들립니다. 그 어색함이 숨은 기준을 찾는 단서입니다. 게임은 숨은 기준을 찾고, 그 기준 때문에 손해 보는 사람을 살피고, 같은 상황에서 다르게 말해 보는 순서로 진행됩니다.</p></section>
+  <section><h3>우리 주변의 말, 성별을 바꿔 읽으면</h3>
+    ${PAIRS.map(p=>`<div class="pair"><span>${esc(p[0])}</span><span class="to">⇄</span><span class="b">${esc(p[1])}</span><small>${esc(p[2])}</small></div>`).join('')}
+    <p style="font-size:.92em;color:var(--muted)">이런 말은 초등학생에게는 존중받는 경험을 줄이고, 중학생에게는 자기 모습을 찾아가는 과정을 좁힙니다. 누군가에게 하려던 말을 한 번만 성별을 바꿔 떠올려 보세요.</p></section>
+  <section><h3>경계존중이란?</h3>
+    <p>몸과 마음, 말과 시선의 영역을 지키고 서로 존중하는 것입니다. 자신의 경계를 지킬 수 있어야 다른 사람의 경계도 존중할 수 있으며, 이는 성폭력·학교폭력 예방과도 이어집니다. 원치 않는 스킨십, 허락 없는 사진 공유, 무례한 말은 모두 경계 침해입니다.</p></section>
+  <section><h3>더 알아보기</h3>
+    <p>인천광역시교육청 성인지감수성 자가진단 (학생 초5~고3, 교직원)<br><a href="http://2zt.kr/42730" target="_blank" rel="noopener">http://2zt.kr/42730</a></p></section>
+  <button class="go" id="bInfoBack" type="button" style="align-self:center">게임하러 가기</button>
+  </div>`;
+  $('#splash').hidden=false; $('#splash').scrollTop=0;
+  $('#bInfoBack').onclick=back;
+}
+
+function start(g){
+  grade=g; G=BANK[g];
+  document.body.classList.remove(...GRADES,'adult'); document.body.classList.add(g); if(ADULT.includes(g)) document.body.classList.add('adult');
+  $('#sub').textContent=G.label;
+  // 남녀 사례가 번갈아 고르게 나오도록 뽑기
+  const order=[], cnt={m:0,f:0};
+  G.levels.forEach((_,n)=>{
+    const pool=shuffle(G.scenes.filter(d=>d.lv===n+1)), k=Array.isArray(G.perLevel)?G.perLevel[n]:G.perLevel;
+    for(let j=0;j<k&&pool.length;j++){
+      const need=cnt.m===cnt.f?(Math.random()<.5?'m':'f'):(cnt.m<cnt.f?'m':'f');
+      let i=pool.findIndex(d=>d.g===need); if(i<0) i=pool.findIndex(d=>d.g==='b'); if(i<0) i=0;
+      const d=pool.splice(i,1)[0]; if(d.g in cnt) cnt[d.g]++; order.push(d);
+    }
+  });
+  S={order,i:0,phase:'find',flipped:false,ever:false,tries:0,score:0,lose:{},write:{},msg:'',gain:0,pop:false,
+     code:Math.random().toString(36).slice(2,6).toUpperCase(),scr:scramble(pieceChars(g)),pz:[],pzTries:0,pzSelf:true};
+  G.together ? showTogether() : showLevel(1);
+}
+const cur=()=>S.order[S.i];
+
+function showTogether(){
+  $('#splashIn').innerHTML=`<span class="num">보호자와 함께해요</span><h2>${esc(G.label)}은<br>가족과 함께 해요</h2>
+  <ol class="how">
+    <li><span>1</span>이야기를 소리 내어 같이 읽어 주세요. 위쪽 '읽어 주기'를 누르면 읽어 줘요.</li>
+    <li><span>2</span>스위치를 누른 뒤 "어떤 말이 이상하게 들려?" 하고 물어봐 주세요. 답을 먼저 알려 주지 않아도 돼요.</li>
+    <li><span>3</span>"나라면 이렇게 말할래"는 아이가 말하고 보호자가 대신 써 줘도 좋아요.</li>
+  </ol>
+  <p>10분이면 끝나요. 다 하면 보물 조각과 선물 추첨이 기다려요!</p>
+  <button class="go" id="bTog" type="button">함께 시작하기</button>`;
+  $('#splash').hidden=false;
+  $('#bTog').onclick=()=>showLevel(1);
+  $('#bTog').focus();
+}
+
+function showLevel(lv){
+  const L=G.levels[lv-1], n=G.levels.length;
+  $('#splashIn').innerHTML=`<span class="num">${n>1?`${lv}단계 / ${n}단계`:esc(G.label)}</span><h2>${esc(L.name)}</h2><p>${esc(L.tip)}</p><button class="go" id="bStart" type="button">${lv===1?'시작하기':'계속하기'}</button>`;
+  $('#splash').hidden=false;
+  $('#bStart').onclick=()=>{$('#splash').hidden=true;render();};
+  $('#bStart').focus();
+}
+
+function stats(){
+  $('#sProg').textContent=`${Math.min(S.i+1,S.order.length)}/${S.order.length}`;
+  $('#sScore').textContent=S.score;
+}
+function revealed(){ // 몇 글자가 열렸나: 찾은 장면 수에 비례
+  const done=S.i+(S.phase==='find'?0:1), n=pieceChars(grade).length;
+  return Math.min(n,Math.ceil(done*n/S.order.length));
+}
+function tilesHTML(){
+  const ch=S.scr, r=revealed();
+  return `<span class="piece"><span class="lbl2">섞인 보물 글자</span><span class="tiles">${ch.map((c,i)=>`<i class="${i<r?'on':''}${S.pop&&i<r&&i>=S.prevR?' pop':''}">${i<r?esc(c):'?'}</i>`).join('')}</span></span>`;
+}
+
+function sentHTML(d,armed){
+  return `<p class="sent ${armed?'armed':''}" id="sent">${norm(d.s).map((c,i)=>{
+    const txt=S.flipped?c.f:c.o, chg=c.o!==c.f;
+    const key=(S.phase!=='find'&&c.k)?' key':'';
+    return `<span class="ch${chg&&S.ever&&S.phase==='find'?' chg':''}${key}" data-i="${i}" ${armed?'role="button" tabindex="0"':''}>${esc(txt)}</span>`;
+  }).join('')}</p>`;
+}
+
+function render(){
+  stats();
+  const d=cur(), L=G.levels[d.lv-1];
+  const dots=`<span class="dots" aria-hidden="true">${S.order.map((_,n)=>`<i class="${n<S.i?'d':n===S.i?'now':''}"></i>`).join('')}</span>`;
+  let h=`<div class="tag">${dots}<span class="lv">${G.levels.length>1?d.lv+'단계 · ':''}${esc(L.name)}</span><span class="area">${esc(d.area)}</span>${tilesHTML()}</div><section class="scene">`;
+  S.pop=false;
+  if(S.phase==='find'){
+    h+=sentHTML(d,S.ever);
+    h+=`<button class="switch ${S.flipped?'on':''}" id="bFlip" type="button" aria-pressed="${S.flipped}"><span class="track"><span class="knob">⇄</span></span><span class="lbl">${S.flipped?'원래대로 돌리기':'성별 바꿔 보기'}</span></button>`;
+    h+=`<p class="guide">${S.ever?'바꿔 읽으니 어색하게 들리는 말이 있나요? 그 말을 눌러 보세요.':'스위치를 눌러 이야기 속 성별을 바꿔 보세요.'}</p>`;
+    h+=`<p class="msg" id="msg" aria-live="polite">${esc(S.msg)}</p>`;
+  } else {
+    h+=sentHTML(d,false);
+    h+=`<div class="std"><span class="stamp">+${S.gain}</span><span class="k">당연하게 여겨진 것</span><span class="v">${esc(d.std)}</span></div>`;
+    h+=stepHTML(d);
+  }
+  h+=`</section>`;
+  $('#stage').innerHTML=h;
+  bind(d);
+}
+
+function stepHTML(d){
+  const last=S.i===S.order.length-1, nextLbl=last?'마지막 수수께끼로':'다음 장면';
+  if(S.phase==='lose'){
+    const sel=S.lose[d.id]||[], done=S.lose[d.id+'_ok'], out=S.lose[d.id+'_out']||[];
+    const ord=S.lose[d.id+'_ord']||(S.lose[d.id+'_ord']=shuffle([...d.lose.map((_,i)=>i),...(d.trap?['T']:[])]));
+    const txt=k=>k==='T'?d.trap.t:d.lose[k];
+    let h=`<p class="ask">이 생각 때문에 손해 보는 사람을 모두 골라요.${d.trap?' 함정이 하나 숨어 있어요!':''}</p>
+    <div class="opts">${ord.map(k=>{
+      const isOut=out.includes(k), trapShown=done&&k==='T';
+      const pressed=!isOut&&!trapShown&&(done?k!=='T':sel.includes(k));
+      return `<button type="button" class="opt${isOut||trapShown?' trap':''}" data-lose="${k}" aria-pressed="${pressed}" ${done||isOut?'disabled':''}><span class="box"></span><span>${esc(txt(k))}${isOut||trapShown?' <b class="trapTag">함정</b>':''}</span></button>`;}).join('')}</div>`;
+    if(S.trapMsg) h+=`<p class="note warn">${esc(S.trapMsg)}</p>`;
+    if(done){
+      const missed=d.lose.length-sel.filter(k=>k!=='T').length;
+      h+=`<p class="note">${missed?`놓친 것도 있었어요. 체크된 ${d.lose.length}가지가 모두 손해예요.`:'손해 보는 사람을 모두 찾았어요!'} 이 생각은 한쪽 성별만 묶지 않아요.</p><div class="row"><button class="go" id="bToWrite" type="button">다음</button></div>`;
+    } else h+=`<div class="row"><button class="go" id="bCheck" type="button" ${sel.length?'':'disabled'}>확인</button></div>`;
+    return h;
+  }
+  if(S.phase==='write'){
+    const w=G.write;
+    if(w.pickOnly){
+      const p=S.write[d.id];
+      return `<p class="ask">${esc(w.ask)}</p><div class="opts">${d.say.map((t,i)=>`<button type="button" class="opt" data-pick="${i}" aria-pressed="${p===t}"><span class="box"></span><span>${esc(t)}</span></button>`).join('')}</div>
+      <p class="guide">${esc(w.note)}</p>
+      <div class="row"><button class="go" id="bNext" type="button" ${p?'':'disabled'}>${nextLbl}</button></div>`;
+    }
+    return `<p class="ask">${esc(w.ask)}</p>
+    ${d.say?`<div class="chips">${d.say.map((t,i)=>`<button type="button" class="chip" data-chip="${i}">${esc(t)}</button>`).join('')}</div>`:''}
+    <textarea id="tWrite" placeholder="${esc(w.ph)}">${esc(S.write[d.id]||'')}</textarea>
+    <p class="guide">${esc(w.note)}</p>
+    <p class="msg" id="wMsg" aria-live="polite"></p>
+    <div class="row"><button class="go" id="bNext" type="button" disabled>${nextLbl}</button></div>`;
+  }
+  return '';
+}
+
+function focusOn(sel,block){ requestAnimationFrame(()=>{ const el=document.querySelector(sel); if(el) el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:block||'start'}); }); }
+function afterFind(){ return G.steps[0]; }
+function bind(d){
+  const f=$('#bFlip');
+  if(f) f.onclick=()=>{S.flipped=!S.flipped;S.ever=true;S.msg='';render();};
+  document.querySelectorAll('.armed .ch').forEach(el=>{
+    const go=()=>tap(d,+el.dataset.i,el);
+    el.onclick=go; el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};
+  });
+  document.querySelectorAll('[data-lose]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.lose==='T'?'T':+b.dataset.lose, a=S.lose[d.id]||(S.lose[d.id]=[]);
+    a.includes(k)?a.splice(a.indexOf(k),1):a.push(k); S.trapMsg=''; render();
+  });
+  document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{S.write[d.id]=d.say[+b.dataset.pick];render();});
+  const c=$('#bCheck'); if(c) c.onclick=()=>{
+    const a=S.lose[d.id]||[];
+    if(a.includes('T')){
+      a.splice(a.indexOf('T'),1); (S.lose[d.id+'_out']||(S.lose[d.id+'_out']=[])).push('T');
+      S.trapMsg=`잠깐! 다시 생각해 볼까요? ${d.trap.why}`; render(); focusOn('.note.warn','center'); return;
+    }
+    S.lose[d.id+'_ok']=true;
+    if(!(S.lose[d.id+'_out']||[]).length && a.length===d.lose.length) S.score+=50;
+    S.trapMsg=''; render(); focusOn('#bToWrite','center');
+  };
+  const tw=$('#bToWrite'); if(tw) tw.onclick=()=>{S.phase='write';render();focusOn('.std');};
+  const tW=$('#tWrite');
+  if(tW){
+    const chk=()=>{
+      const v=tW.value.trim(), ex=(d.say||[]).includes(v);
+      $('#bNext').disabled = v.length<2 || ex;
+      $('#wMsg').textContent = ex ? '예시 그대로예요. 한 단어라도 내 말로 바꿔 써 보세요.' : '';
+    };
+    tW.addEventListener('input',chk); chk();
+    document.querySelectorAll('[data-chip]').forEach(b=>b.onclick=()=>{tW.value=d.say[+b.dataset.chip];chk();tW.focus();});
+  }
+  const n=$('#bNext'); if(n) n.onclick=()=>{
+    const t=$('#tWrite');
+    if(t){ const v=t.value.trim(); S.write[d.id]=v; if(v && !(d.say||[]).includes(v)) S.score+=50; }
+    next();
+  };
+}
+
+function tap(d,i,el){
+  const c=norm(d.s)[i];
+  if(c.k){
+    S.prevR=revealed();
+    S.gain=S.tries===0?100:50; S.score+=S.gain;
+    S.phase=afterFind(); S.flipped=false; S.pop=true; render(); focusOn('.std'); return;
+  }
+  S.tries++;
+  el.classList.remove('no'); void el.offsetWidth; el.classList.add('no');
+  S.msg = c.o!==c.f ? '이름만 바뀌었어요. 이야기 속 다른 말은 어떤가요?'
+        : S.tries>=2 ? '힌트: 누군가 한 말(따옴표 안)을 바꿔 읽어 보세요.'
+        : '이 부분은 성별을 바꿔도 그대로예요. 다른 곳을 찾아볼까요?';
+  $('#msg').textContent=S.msg;
+}
+
+function next(){
+  const prevLv=cur().lv;
+  S.i++; S.phase='find'; S.flipped=false; S.ever=false; S.tries=0; S.msg='';
+  if(S.i>=S.order.length){puzzle();return;}
+  window.scrollTo(0,0);
+  cur().lv!==prevLv ? showLevel(cur().lv) : render();
+}
+
+function puzzle(){
+  $('#sProg').textContent=`${S.order.length}/${S.order.length}`; $('#sScore').textContent=S.score;
+  const ans=pieceChars(grade), used=S.pz;
+  const left=S.scr.map((c,i)=>({c,i})).filter(o=>!used.includes(o.i));
+  const hint=S.pzTries>=2?`힌트: 첫 글자는 '${ans[0]}'예요.`:'';
+  $('#stage').innerHTML=`<section class="scene" style="align-items:center;text-align:center">
+    <span class="tag">마지막 수수께끼</span>
+    <h2 class="t" style="font-size:1.6em">섞인 글자를 바른 순서로 맞춰 보세요</h2>
+    <p class="guide">장면을 풀며 모은 글자예요. 순서대로 누르면 아래 칸에 들어가요.</p>
+    <div class="tiles" style="font-size:1.4em;min-height:2.2em" aria-label="내가 맞춘 순서">${ans.map((_,k)=>`<i class="${used[k]!==undefined?'on':''}">${used[k]!==undefined?esc(S.scr[used[k]]):''}</i>`).join('')}</div>
+    <div class="row" style="justify-content:center">${left.map(o=>`<button type="button" class="chip" style="font-size:1.4em;font-family:var(--display);min-width:2.2em" data-pz="${o.i}">${esc(o.c)}</button>`).join('')}</div>
+    <p class="msg" id="pzMsg" aria-live="polite">${esc(S.pzMsg||hint)}</p>
+    <div class="row" style="justify-content:center">
+      <button class="go ghost" id="bUndo" type="button" ${used.length?'':'disabled'}>한 글자 지우기</button>
+      ${S.pzTries>=4?'<button class="go ghost" id="bReveal" type="button">정답 보기</button>':''}
+    </div></section>`;
+  window.scrollTo(0,0);
+  document.querySelectorAll('[data-pz]').forEach(b=>b.onclick=()=>{
+    S.pz.push(+b.dataset.pz); S.pzMsg='';
+    if(S.pz.length===ans.length){
+      if(S.pz.map(i=>S.scr[i]).join('')===ans.join('')){ S.score+=S.pzSelf?100:0; end(); return; }
+      S.pzTries++; S.pz=[]; S.pzMsg='순서가 조금 달라요. 다시 해 볼까요?'+(S.pzTries>=2?` 첫 글자는 '${ans[0]}'예요.`:'');
+    }
+    puzzle();
+  });
+  $('#bUndo').onclick=()=>{S.pz.pop();S.pzMsg='';puzzle();};
+  const rv=$('#bReveal'); if(rv) rv.onclick=()=>{S.pzSelf=false;end();};
+}
+
+function end(){
+  S.done=true;
+  $('#sProg').textContent=`${S.order.length}/${S.order.length}`; $('#sScore').textContent=S.score;
+  const ws=S.order.filter(d=>S.write[d.id]);
+  const pick=ws.length?ws[ws.length-1]:null;
+  const now=new Date(), stamp=`${now.getMonth()+1}월 ${now.getDate()}일 ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const myIdx=ORDER.indexOf(grade);
+  let h=`<section class="card" id="card">
+    <span class="eyebrow">평등탐험 보물찾기 RUN · 보물 조각 카드</span>
+    <h2>${S.pzSelf?'수수께끼를 풀었어요!':esc(G.label)+' 조각을 찾았어요!'}</h2>
+    <div class="phrase">${ORDER.map((g,i)=>`<div class="${i===myIdx?'mine':''}"><small>${esc(BANK[g].label)}</small><b>${i===myIdx?esc(BANK[g].piece):'? ? ?'}</b></div>`).join('')}</div>
+    <p class="guide">여섯 조각을 순서대로 이으면 문장 하나가 완성돼요. 가족, 선생님, 다른 학년 친구에게 조각을 물어보세요!</p>
+    ${pick?`<p class="mysay"><small>${esc(G.write.tag)}</small>${esc(S.write[pick.id])}</p>`:''}
+    <span class="code">찾은 기준 ${S.order.length}개 · 점수 ${S.score}점 · ${stamp} · 확인 번호 ${S.code}</span>
+  </section>
+  <p class="note">${esc(G.endAsk)}</p>
+  <section class="scene" id="send">
+    <h2 class="t" style="font-size:1.5em">${grade==='par'?'가족 보드게임 추첨에 응모하기':'선물 추첨에 응모하기'}</h2>
+    ${grade==='par'?'<p class="guide">당첨된 가정에는 가족이 함께할 수 있는 보드게임을 자녀 편으로 보내 드려요.</p>':''}
+    <p class="guide">${grade==='staff'?'소속 학교와 이름':'학년·반·번호와 이름'}은 선물 추첨에만 쓰고, 행사가 끝나면 지웁니다. 내가 쓴 말은 이름 없이 학교 전시와 ${grade==='staff'?'연수':'수업'} 자료에 쓰일 수 있어요.</p>
+    <label class="opt" for="cAgree" style="cursor:pointer"><input type="checkbox" id="cAgree" style="width:22px;height:22px;margin:2px 0 0;flex:none"><span>위 내용을 읽었고 동의해요.${grade==='par'||grade==='staff'?'':' (보호자와 함께 확인해 주세요)'}</span></label>
+    <div class="row" style="align-items:stretch">
+      ${grade==='staff'
+        ? `<select id="sSchool" class="field sel" aria-label="소속 학교"><option value="">소속 학교</option><option value="초등학교">초등학교</option><option value="중학교">중학교</option></select>`
+        : `${gradeSelect()}
+      <select id="sClass" class="field sel" aria-label="반"><option value="">반</option>${range(1,CLASS_MAX).map(n=>`<option value="${n}">${n}반</option>`).join('')}</select>
+      <select id="sNum" class="field sel" aria-label="번호"><option value="">번호</option>${range(1,NUM_MAX).map(n=>`<option value="${n}">${n}번</option>`).join('')}</select>`}
+      <input id="iName" class="field" placeholder="${grade==='par'?'자녀 이름':'이름'}" autocomplete="off" aria-label="이름">
+    </div>
+    <a class="go" id="aSend" href="#" target="_blank" rel="noopener" aria-disabled="true">${grade==='staff'?'응모하기':'선생님께 보내기'}</a>
+    <p class="guide" id="sendMsg" aria-live="polite"></p>
+  </section>`;
+  h+=`<div class="row"><button class="go" id="bAgain" type="button">새 장면으로 한 판 더</button><button class="go ghost" id="bHome" type="button">처음 화면으로</button></div>
+  <button type="button" class="infoBtn" id="bInfo2" style="align-self:flex-start">더 알아보기</button>`;
+  $('#stage').innerHTML=h;
+  window.scrollTo(0,0);
+  bindSend(ws);
+  $('#bAgain').onclick=()=>start(grade);
+  $('#bHome').onclick=home;
+  $('#bInfo2').onclick=()=>showInfo(()=>{$('#splash').hidden=true;});
+}
+
+
+const CLASS_MAX=6, NUM_MAX=40;
+const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
+const GRADE_OPTS={e1:['초1','초2'],e3:['초3','초4'],e5:['초5','초6'],mid:['중1','중2','중3'],
+  par:['초1','초2','초3','초4','초5','초6','중1','중2','중3']};
+function gradeSelect(){
+  const o=(GRADE_OPTS[grade]||[]).map(v=>`<option value="${v}">${v.replace('초','초등 ').replace('중','중학교 ')}학년</option>`).join('');
+  return `<select id="sGrade" class="field sel" aria-label="학년"><option value="">${grade==='par'?'자녀 학년':'학년'}</option>${o}</select>`;
+}
+function bindSend(ws){
+  const says=ws.map(d=>`[${d.std}] ${S.write[d.id]}`).join(' / ');
+  // 중학생, 중학생 자녀를 고른 양육자, 중학교 교직원 → 중학교 폼 / 그 밖 → 초등 폼
+  const pickForm=()=>{
+    const v=id=>{const e=$('#'+id); return e?e.value:'';};
+    const isMid = grade==='mid' || (grade==='par' && v('sGrade').startsWith('중')) || (grade==='staff' && v('sSchool')==='중학교');
+    return FORM[isMid ? 'mid' : 'elem'] || {base:'',ids:{}};
+  };
+  let F = pickForm();
+  const ready=!!F.base;
+  const upd=()=>{
+    F = pickForm();
+    const staff=grade==='staff', v=id=>{const e=$('#'+id); return e?e.value:'';};
+    const a=$('#aSend'), ok=ready && $('#cAgree').checked && (staff ? v('sSchool') : (v('sGrade') && v('sClass') && v('sNum'))) && v('iName').trim();
+    a.setAttribute('aria-disabled', ok?'false':'true');
+    if(ok){
+      const q=new URLSearchParams();
+      const put=(k,v)=>{ if(F.ids[k]) q.set(F.ids[k], v); };
+      put('grade',G.label); put('code',S.code); put('piece',G.piece+(S.pzSelf?'':' (정답 보기 사용)')); put('says',says||'(쓴 말 없음)');
+      put('who', staff ? `교직원 ${v('sSchool')} ${v('iName').trim()}` : `${v('sGrade')} ${v('sClass')}반 ${v('sNum')}번 ${v('iName').trim()}`);
+      a.href=F.base+(F.base.includes('?')?'&':'?')+'usp=pp_url&'+q.toString();
+    } else a.href='#';
+    $('#sendMsg').textContent = !ready ? '응모 창구를 준비하고 있어요.'
+      : ok ? "열린 화면 맨 아래의 '제출' 버튼까지 꼭 눌러 주세요." : (staff ? '동의하고 소속 학교를 고른 뒤 이름을 적으면 응모할 수 있어요.' : '동의하고 학년·반·번호를 고른 뒤 이름을 적으면 보낼 수 있어요.');
+  };
+  ['cAgree','sGrade','sClass','sNum','sSchool','iName'].forEach(id=>{const e=$('#'+id); if(e){e.addEventListener('input',upd);e.addEventListener('change',upd);}});
+  $('#cAgree').addEventListener('change',upd);
+  $('#aSend').addEventListener('click',e=>{ if($('#aSend').getAttribute('aria-disabled')==='true') e.preventDefault(); });
+  upd();
+}
+
+$('#bGoHome').onclick=()=>{
+  const playing = S && grade && !S.done && (S.i>0 || S.phase!=='find' || S.ever);
+  if(!playing){ home(); return; }
+  const wasOpen=!$('#splash').hidden;
+  $('#splashIn').innerHTML=`<h2 style="font-size:1.8em">처음 화면으로 갈까요?</h2>
+    <p>지금까지 푼 장면과 쓴 말은 저장되지 않아요.</p>
+    <div class="row" style="justify-content:center"><button class="go" id="bHomeYes" type="button">처음으로 가기</button><button class="go ghost" id="bHomeNo" type="button">계속하기</button></div>`;
+  $('#splash').hidden=false;
+  $('#bHomeYes').onclick=home;
+  $('#bHomeNo').onclick=()=>{ $('#splash').hidden=true; if(wasOpen && S.order[S.i] && S.i<S.order.length) render(); };
+  $('#bHomeNo').focus();
+};
+$('#bBig').onclick=()=>{const on=document.body.classList.toggle('big');$('#bBig').setAttribute('aria-pressed',on);};
+$('#bRead').onclick=()=>{
+  try{
+    const el=$('#sent'); if(!el) return;
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(el.textContent); u.lang='ko-KR'; u.rate=.85;
+    speechSynthesis.speak(u);
+  }catch(e){}
+};
+home();
+</script>
+
+</body></html>
